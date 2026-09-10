@@ -1,3 +1,6 @@
+Author: Nate Downey 
+Date: Sept 2026
+
 Introduction
 
 In this project, you will design and implement a command-line application called the Personal Library Manager. The goal of this project is to help you master Python’s built-in data structures and understand how design decisions evolve as a program grows in complexity. You will build a system that allows a user to store, search, update, analyze, and persist information about books in a personal library.
