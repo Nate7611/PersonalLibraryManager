@@ -26,7 +26,9 @@ These limitations are exactly why the project moves on to Layer 2.
 library = []
 
 def add_book():
-    pass
+    book_title = input("Enter the book title: ")
+    library.append(book_title)
+    display_menu()
 
 
 def remove_book():
@@ -35,8 +37,9 @@ def remove_book():
 
 def list_books():
     if (len(library) > 0):
-        for book in library:
-            print(book)
+        print("")
+        for id, book in enumerate(library):
+            print(f"{id + 1}. {book}")
         display_menu()
     else:
         print("\nNo books in library.")
@@ -52,9 +55,9 @@ def run_menu_option(menu_option):
         case 3:
             list_books()
         case 4:
-            print("Goodbye")
+            print("\nGoodbye")
         case _:
-            print("Unknown menu option, exiting.")
+            print("\nUnknown menu option, exiting.")
 
 
 def select_menu_option():
