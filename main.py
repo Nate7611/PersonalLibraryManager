@@ -35,6 +35,12 @@ LIBRARY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "library
 
 
 def load_library():
+    """
+    Load book titles from LIBRARY_FILE into the library list.
+
+    Params: none.
+    Returns: None.
+    """
     if os.path.exists(LIBRARY_FILE):
         with open(LIBRARY_FILE, "r", encoding="utf-8") as f:
             for line in f:
@@ -44,26 +50,61 @@ def load_library():
 
 
 def save_library():
+    """
+    Write the current library list to LIBRARY_FILE, one title per line.
+
+    Params: none.
+    Returns: None.
+    """
     with open(LIBRARY_FILE, "w", encoding="utf-8") as f:
         for book in library:
             f.write(book + "\n")
 
 
 def exit_program():
+    """
+    Save the library to disk and print a goodbye message before quitting.
+
+    Params: none.
+    Returns: None.
+    """
     save_library()
     print("\nGoodbye")
 
 
 def matches_search(book, query):
+    """
+    Check whether a search query appears in a book title, case-insensitively.
+
+    Params:
+        book (str): The book title to check.
+        query (str): The search term to look for.
+    Returns:
+        bool: True if query is found in book, False otherwise.
+    """
     return query.lower() in book.lower()
 
 
 def format_book(book):
+    """
+    Format a book entry for display.
+
+    Params:
+        book: The book entry to format (currently a plain string).
+    Returns:
+        The formatted book entry. Placeholder until book dicts are implemented.
+    """
     # Will format book dicts when implemented 
     return book
 
 
 def search_book():
+    """
+    Repeatedly prompt for a search term and print matching books until blank input.
+
+    Params: none.
+    Returns: None. Returns control to the menu when done.
+    """
     print("")
     while True:
         query = input("Enter search term (Blank line to exit): ")
@@ -84,6 +125,12 @@ def search_book():
 
 
 def add_book():
+    """
+    Repeatedly prompt for book titles and add each to the library until blank input.
+
+    Params: none.
+    Returns: None. Saves the library and returns control to the menu when done.
+    """
     print("")
     while True:
         book_title = input("Enter book title to add (Blank line to exit): ")
@@ -99,6 +146,12 @@ def add_book():
 
 
 def remove_book():
+    """
+    Repeatedly prompt for book titles and remove each from the library until blank input.
+
+    Params: none.
+    Returns: None. Saves the library and returns control to the menu when done.
+    """
     print("")
     while True:
         book_title = input("Enter book title to remove (Blank line to exit): ")
@@ -116,6 +169,12 @@ def remove_book():
 
 
 def list_books():
+    """
+    Print every book currently in the library, numbered, or a message if empty.
+
+    Params: none.
+    Returns: None. Returns control to the menu when done.
+    """
     if (len(library) > 0):
         print("\nLibrary:")
         for id, book in enumerate(library, start=1):
@@ -127,6 +186,13 @@ def list_books():
 
 
 def select_menu_option(options):
+    """
+    Prompt the user for a menu number and call the matching option's function.
+
+    Params:
+        options (list[dict]): Menu options, each with a "text" label and a "function" callback.
+    Returns: None.
+    """
     option_number = 0
     while True:
         if 0 < option_number <= len(options):
@@ -140,6 +206,12 @@ def select_menu_option(options):
 
 
 def display_menu():
+    """
+    Print the main menu and hand off to select_menu_option to run the chosen action.
+
+    Params: none.
+    Returns: None.
+    """
     print("\nPersonal Library Manager")
     options = [
         {"text": "Add Book", "function": add_book},
@@ -154,6 +226,12 @@ def display_menu():
 
 
 def main():
+    """
+    Load the saved library and start the interactive menu loop.
+
+    Params: none.
+    Returns: None.
+    """
     load_library()
     display_menu()
 
