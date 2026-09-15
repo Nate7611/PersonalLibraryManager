@@ -24,10 +24,23 @@ These limitations are exactly why the project moves on to Layer 2.
 """
 
 
+import os
+
+
 library = []
 
 
+# save file next to the script
+LIBRARY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "library.txt")
+
+def save_library():
+    with open(LIBRARY_FILE, "w", encoding="utf-8") as f:
+        for book in library:
+            f.write(book + "\n")
+
+
 def exit_program():
+    save_library()
     print("\nGoodbye")
 
 
@@ -44,8 +57,9 @@ def add_book():
             break
         
         library.append(book_title)
-        print(f"Added ${book_title} to library.")
+        print(f"Added {book_title} to library.")
         
+    save_library()
     display_menu()
 
 
@@ -58,10 +72,11 @@ def remove_book():
             break
         elif (book_title in library):
             library.remove(book_title)
-            print(f"Removed ${book_title} from library.")
+            print(f"Removed {book_title} from library.")
         else:
             print(f"{book_title} doesn't exist in library.")
         
+    save_library()
     display_menu()
 
 
