@@ -23,7 +23,17 @@ Limitations (intentional, to motivate Layer 2)
 These limitations are exactly why the project moves on to Layer 2.
 """
 
+
 library = []
+
+
+def exit_program():
+    print("\nGoodbye")
+
+
+def search_book():
+    pass
+
 
 def add_book():
     print("")
@@ -56,48 +66,39 @@ def remove_book():
 def list_books():
     if (len(library) > 0):
         print("\nLibrary:")
-        for id, book in enumerate(library):
-            print(f"{id + 1}. {book}")
+        for id, book in enumerate(library, start=1):
+            print(f"{id}. {book}")
         display_menu()
     else:
         print("\nNo books in library.")
         display_menu()
 
 
-def run_menu_option(menu_option):
-    match menu_option:
-        case 1:
-            add_book()
-        case 2:
-            remove_book()
-        case 3:
-            list_books()
-        case 4:
-            print("\nGoodbye")
-        case _:
-            print("\nUnknown menu option, exiting.")
-
-
-def select_menu_option():
+def select_menu_option(options):
     option_number = 0
     while True:
-        if option_number > 0 and option_number < 5:
+        if 0 < option_number <= len(options):
             break
         else:
             try:
                 option_number = int(input("Select option: "))
-            except:
+            except ValueError:
                 print("Input must be a valid number.")
-    run_menu_option(option_number)
+    options[option_number - 1]["function"]()
 
 
 def display_menu():
     print("\nPersonal Library Manager")
-    print("1. Add book")
-    print("2. Remove book")
-    print("3. List books")
-    print("4. Exit")
-    select_menu_option()
+    options = [
+        {"text": "Add Book", "function": add_book},
+        {"text": "Remove Book", "function": remove_book},
+        {"text": "List Books", "function": list_books},
+        {"text": "Search Book", "function": search_book},
+        {"text": "Exit", "function": exit_program},
+    ]
+    for i, option in enumerate(options, start=1):
+        print(f"{i}. {option['text']}")
+    select_menu_option(options)
 
 
 def main():
