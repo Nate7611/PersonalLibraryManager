@@ -28,7 +28,7 @@ library = []
 def add_book():
     print("")
     while True:
-        book_title = input("Enter book title (Blank line to exit): ")
+        book_title = input("Enter book title to add (Blank line to exit): ")
         
         if (book_title == ""):
             break
@@ -39,7 +39,18 @@ def add_book():
 
 
 def remove_book():
-    pass
+    print("")
+    while True:
+        book_title = input("Enter book title to remove (Blank line to exit): ")
+        
+        if (book_title == ""):
+            break
+        elif (book_title in library):
+            library.remove(book_title)
+        else:
+            print(f"{book_title} doesn't exist in library.")
+        
+    display_menu()
 
 
 def list_books():
