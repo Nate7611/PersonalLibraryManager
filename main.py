@@ -133,7 +133,7 @@ def add_book():
     """
     print("")
     while True:
-        book_title = input("Enter book title to add (Blank line to exit): ")
+        book_title = input("Enter book title to add (Blank line to exit): ").strip()
         
         if (book_title == ""):
             break
@@ -154,7 +154,7 @@ def remove_book():
     """
     print("")
     while True:
-        book_title = input("Enter book title to remove (Blank line to exit): ")
+        book_title = input("Enter book title to remove (Blank line to exit): ").strip()
         
         if (book_title == ""):
             break
