@@ -33,6 +33,16 @@ library = []
 # save file next to the script
 LIBRARY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "library.txt")
 
+
+def load_library():
+    if os.path.exists(LIBRARY_FILE):
+        with open(LIBRARY_FILE, "r", encoding="utf-8") as f:
+            for line in f:
+                title = line.rstrip("\n")
+                if title != "":
+                    library.append(title)
+
+
 def save_library():
     with open(LIBRARY_FILE, "w", encoding="utf-8") as f:
         for book in library:
@@ -119,6 +129,7 @@ def display_menu():
 
 
 def main():
+    load_library()
     display_menu()
 
 
