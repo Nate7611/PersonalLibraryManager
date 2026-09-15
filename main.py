@@ -26,8 +26,14 @@ These limitations are exactly why the project moves on to Layer 2.
 library = []
 
 def add_book():
-    book_title = input("Enter the book title: ")
-    library.append(book_title)
+    while True:
+        book_title = input("Enter book title (Blank line to exit): ")
+        
+        if (book_title == ""):
+            break
+        
+        library.append(book_title)
+        
     display_menu()
 
 
@@ -69,7 +75,7 @@ def select_menu_option():
             try:
                 option_number = int(input("Select option: "))
             except:
-                print("Input must be a valid number")
+                print("Input must be a valid number.")
     run_menu_option(option_number)
 
 
