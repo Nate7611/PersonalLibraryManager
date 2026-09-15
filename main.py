@@ -26,6 +26,7 @@ These limitations are exactly why the project moves on to Layer 2.
 library = []
 
 def add_book():
+    print("")
     while True:
         book_title = input("Enter book title (Blank line to exit): ")
         
@@ -43,7 +44,7 @@ def remove_book():
 
 def list_books():
     if (len(library) > 0):
-        print("")
+        print("\nLibrary:")
         for id, book in enumerate(library):
             print(f"{id + 1}. {book}")
         display_menu()
