@@ -23,6 +23,7 @@ Limitations (intentional, to motivate Layer 2)
 These limitations are exactly why the project moves on to Layer 2.
 """
 
+library = []
 
 def add_book():
     pass
@@ -33,7 +34,13 @@ def remove_book():
 
 
 def list_books():
-    pass
+    if (len(library) > 0):
+        for book in library:
+            print(book)
+        display_menu()
+    else:
+        print("\nNo books in library.")
+        display_menu()
 
 
 def run_menu_option(menu_option):
