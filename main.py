@@ -54,8 +54,33 @@ def exit_program():
     print("\nGoodbye")
 
 
+def matches_search(book, query):
+    return query.lower() in book.lower()
+
+
+def format_book(book):
+    # Will format book dicts when implemented 
+    return book
+
+
 def search_book():
-    pass
+    print("")
+    while True:
+        query = input("Enter search term (Blank line to exit): ")
+ 
+        if query == "":
+            break
+ 
+        results = [book for book in library if matches_search(book, query)]
+ 
+        if results:
+            print(f"\nFound {len(results)} matching book(s):")
+            for id, book in enumerate(results, start=1):
+                print(f"{id}. {format_book(book)}")
+        else:
+            print(f"\nNo results found for '{query}'.")
+ 
+    display_menu()
 
 
 def add_book():
