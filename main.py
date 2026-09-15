@@ -44,6 +44,7 @@ def add_book():
             break
         
         library.append(book_title)
+        print(f"Added ${book_title} to library.")
         
     display_menu()
 
@@ -57,6 +58,7 @@ def remove_book():
             break
         elif (book_title in library):
             library.remove(book_title)
+            print(f"Removed ${book_title} from library.")
         else:
             print(f"{book_title} doesn't exist in library.")
         
