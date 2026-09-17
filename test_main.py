@@ -109,3 +109,38 @@ def test_remove_book_keeps_missing_title_and_prints_message(monkeypatch, capsys)
 
     assert main.library == ["Dune"]
     assert "doesn't exist in library" in capsys.readouterr().out
+    
+    
+def test_list_books_prints_numbered_books(monkeypatch, capsys):
+    main.library.extend(["Dune", "The Hobbit"])
+    monkeypatch.setattr(main, "display_menu", lambda: None)
+
+    main.list_books()
+
+    out = capsys.readouterr().out
+    assert "1. Dune" in out
+    assert "2. The Hobbit" in out
+
+
+def test_select_menu_option_runs_chosen_function(monkeypatch):
+    called = []
+    options = [
+        {"text": "A", "function": lambda: called.append("A")},
+        {"text": "B", "function": lambda: called.append("B")},
+    ]
+    monkeypatch.setattr("builtins.input", lambda _: "2")
+
+    main.select_menu_option(options)
+
+    assert called == ["B"]
+
+
+def test_select_menu_option_repeats_on_bad_input(monkeypatch):
+    called = []
+    options = [{"text": "A", "function": lambda: called.append("A")}]
+    answers = iter(["not a number", "1"])
+    monkeypatch.setattr("builtins.input", lambda _: next(answers))
+
+    main.select_menu_option(options)
+
+    assert called == ["A"]
