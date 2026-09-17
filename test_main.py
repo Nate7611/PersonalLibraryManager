@@ -61,3 +61,51 @@ def test_exit_program_saves_and_prints_goodbye(capsys):
 
     assert main.LIBRARY_FILE.read_text(encoding="utf-8") == "Dune\n"
     assert "Goodbye" in capsys.readouterr().out
+ 
+
+def test_add_book_adds_titles_and_saves(monkeypatch):
+    answers = iter(["Dune", "The Hobbit", ""])
+
+    monkeypatch.setattr("builtins.input", lambda _: next(answers))
+    monkeypatch.setattr(main, "display_menu", lambda: None)
+
+    main.add_book()
+
+    assert main.library == ["Dune", "The Hobbit"]
+    assert main.LIBRARY_FILE.read_text(encoding="utf-8") == "Dune\nThe Hobbit\n"
+
+
+def test_add_book_strips_whitespace(monkeypatch):
+    answers = iter(["  Dune  ", ""])
+
+    monkeypatch.setattr("builtins.input", lambda _: next(answers))
+    monkeypatch.setattr(main, "display_menu", lambda: None)
+
+    main.add_book()
+
+    assert main.library == ["Dune"]
+
+
+def test_remove_book_removes_existing_title(monkeypatch):
+    main.library.extend(["Dune", "The Hobbit"])
+    answers = iter(["Dune", ""])
+
+    monkeypatch.setattr("builtins.input", lambda _: next(answers))
+    monkeypatch.setattr(main, "display_menu", lambda: None)
+
+    main.remove_book()
+
+    assert main.library == ["The Hobbit"]
+
+
+def test_remove_book_keeps_missing_title_and_prints_message(monkeypatch, capsys):
+    main.library.append("Dune")
+    answers = iter(["Hobbit", ""])
+
+    monkeypatch.setattr("builtins.input", lambda _: next(answers))
+    monkeypatch.setattr(main, "display_menu", lambda: None)
+
+    main.remove_book()
+
+    assert main.library == ["Dune"]
+    assert "doesn't exist in library" in capsys.readouterr().out
