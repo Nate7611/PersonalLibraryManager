@@ -33,10 +33,10 @@ def test_save_library_writes_book_records():
     main.save_library()
 
     saved = json.loads(main.LIBRARY_FILE.read_text(encoding="utf-8"))
-    assert saved == [
-        {"title": "A", "author": "X", "year": "2000"},
-        {"title": "B", "author": "Y", "year": "2001"},
-    ]
+    assert saved == {
+        "a": {"title": "A", "author": "X", "year": "2000"},
+        "b": {"title": "B", "author": "Y", "year": "2001"},
+    }
 
 
 def test_load_library_reads_saved_books():
@@ -53,10 +53,10 @@ def test_load_library_reads_saved_books():
 
 def test_load_library_reads_multiple_records():
     main.LIBRARY_FILE.write_text(
-        json.dumps([
-            {"title": "A", "author": "X", "year": "2000"},
-            {"title": "B", "author": "Y", "year": "2001"},
-        ]),
+        json.dumps({
+            "a": {"title": "A", "author": "X", "year": "2000"},
+            "b": {"title": "B", "author": "Y", "year": "2001"},
+        }),
         encoding="utf-8",
     )
 
@@ -88,7 +88,7 @@ def test_exit_program_saves_and_prints_goodbye(capsys):
     main.exit_program()
 
     saved = json.loads(main.LIBRARY_FILE.read_text(encoding="utf-8"))
-    assert saved == [{"title": "A", "author": "X", "year": "2000"}]
+    assert saved == {"a": {"title": "A", "author": "X", "year": "2000"}}
     assert "Goodbye" in capsys.readouterr().out
 
 
@@ -109,10 +109,10 @@ def test_add_book_adds_titles_and_saves(monkeypatch):
         "b": {"title": "B", "author": "Y", "year": "2001"},
     }
     saved = json.loads(main.LIBRARY_FILE.read_text(encoding="utf-8"))
-    assert saved == [
-        {"title": "A", "author": "X", "year": "2000"},
-        {"title": "B", "author": "Y", "year": "2001"},
-    ]
+    assert saved == {
+        "a": {"title": "A", "author": "X", "year": "2000"},
+        "b": {"title": "B", "author": "Y", "year": "2001"},
+    }
 
 
 def test_add_book_strips_whitespace(monkeypatch):
