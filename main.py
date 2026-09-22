@@ -157,7 +157,9 @@ def add_book():
     """
     Repeatedly prompt for a book's title, author, and year and add each as
     a (title, author, year) tuple to the library until a blank title is
-    entered. Titles already in the library (case-insensitive) are rejected.
+    entered. If the title already exists in the library (case-insensitive),
+    its author and year are updated in place instead of adding a duplicate
+    entry.
 
     Params: none.
     Returns: None. Saves the library and returns control to the menu when done.
@@ -169,16 +171,18 @@ def add_book():
         if book_title == "":
             break
 
-        if book_title.lower() in book_titles:
-            print(f"{book_title} already exists in library.")
-            continue
-
         author = input("Enter author: ").strip()
         year = input("Enter year published: ").strip()
 
-        library.append((book_title, author, year))
-        book_titles.add(book_title.lower())
-        print(f"Added {book_title} to library.\n")
+        existing = find_book_by_title(book_title)
+        if existing is not None:
+            library.remove(existing)
+            library.append((book_title, author, year))
+            print(f"Updated {book_title} in library.\n")
+        else:
+            library.append((book_title, author, year))
+            book_titles.add(book_title.lower())
+            print(f"Added {book_title} to library.\n")
 
     save_library()
     display_menu()
@@ -257,7 +261,7 @@ def display_menu():
     """
     print("\nPersonal Library Manager")
     options = [
-        {"text": "Add Book", "function": add_book},
+        {"text": "Add or Update Book", "function": add_book},
         {"text": "Remove Book", "function": remove_book},
         {"text": "List Books", "function": list_books},
         {"text": "Search Book", "function": search_book},
