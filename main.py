@@ -144,7 +144,14 @@ def add_book():
             break
 
         author = input("Enter author: ").strip()
-        year = input("Enter year published: ").strip()
+        while author == "":
+            author = input("Author cannot be blank. Enter author: ").strip()
+            
+        year = input("Enter year published (blank if unknown): ").strip()
+        while year != "" and not year.isdigit():
+            year = input("Year must be a number, or blank if unknown: ").strip()
+        if year == "":
+            year = None
 
         key = book_title.lower()
         is_update = key in library
