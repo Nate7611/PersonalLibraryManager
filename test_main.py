@@ -235,3 +235,54 @@ def test_select_menu_option_repeats_on_bad_input(monkeypatch):
     main.select_menu_option(options)
 
     assert called == ["A"]
+
+
+def test_print_author_stats_counts_single_book_per_author(monkeypatch, capsys):
+    main.library.extend([
+        ("Dune", "Frank", "1999"),
+        ("The Hobbit", "Tolkien", "1999"),
+    ])
+    monkeypatch.setattr(main, "display_menu", lambda: None)
+
+    main.print_author_stats()
+
+    out = capsys.readouterr().out
+    assert "Books per author:" in out
+    assert "Frank: 1" in out
+    assert "Tolkien: 1" in out
+
+
+def test_print_author_stats_counts_multiple_books_by_same_author(monkeypatch, capsys):
+    main.library.extend([
+        ("Dune", "Frank", "1999"),
+        ("Dune 2", "Frank", "1999"),
+        ("Dune 3", "Frank", "1999"),
+        ("The Hobbit", "Tolkien", "1999"),
+    ])
+    monkeypatch.setattr(main, "display_menu", lambda: None)
+
+    main.print_author_stats()
+
+    out = capsys.readouterr().out
+    assert "Frank: 3" in out
+    assert "Tolkien: 1" in out
+
+
+def test_print_author_stats_empty_library_prints_message(monkeypatch, capsys):
+    monkeypatch.setattr(main, "display_menu", lambda: None)
+
+    main.print_author_stats()
+
+    out = capsys.readouterr().out
+    assert "No books in library." in out
+    assert "Books per author:" not in out
+
+
+def test_print_author_stats_returns_to_menu(monkeypatch):
+    called = []
+    main.library.append(("Dune", "Frank", "1999"))
+    monkeypatch.setattr(main, "display_menu", lambda: called.append(True))
+
+    main.print_author_stats()
+
+    assert called == [True]
