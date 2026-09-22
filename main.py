@@ -9,38 +9,33 @@ LIBRARY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "library
 
 def load_library():
     """
-    Load books from LIBRARY_FILE into the library dict, keyed by lowercased title.
-    Does nothing if the file is missing; treats invalid JSON as no records.
+    Load LIBRARY_FILE into the library dict, merging its contents in.
+
+    LIBRARY_FILE is expected to already be a JSON object keyed by lowercased
+    title, so entries are merged in as-is with no re-keying. Does nothing if 
+    the file is missing; leaves library unchanged if the file contains invalid JSON.
 
     Params: none.
     Returns: None.
     """
-    if os.path.exists(LIBRARY_FILE):
-        with open(LIBRARY_FILE, "r", encoding="utf-8") as f:
-            try:
-                records = json.load(f)
-            except json.JSONDecodeError:
-                records = []
-
-        for record in records:
-            title = record.get("title", "")
-            author = record.get("author", "Unknown")
-            year = record.get("year", "Unknown")
-            library[title.lower()] = {"title": title, "author": author, "year": year}
-
-        print(f"Loaded {len(records)} books from {os.path.basename(LIBRARY_FILE)}.")
+    if not os.path.exists(LIBRARY_FILE):
+        return
+    with open(LIBRARY_FILE, "r", encoding="utf-8") as f:
+        try:
+            library.update(json.load(f))
+        except json.JSONDecodeError:
+            pass
 
 
 def save_library():
     """
-    Write the library dict to LIBRARY_FILE as a JSON array of book records.
+    Write the library dict to LIBRARY_FILE as JSON, keyed by lowercased title.
 
     Params: none.
     Returns: None.
     """
-    records = list(library.values())
     with open(LIBRARY_FILE, "w", encoding="utf-8") as f:
-        json.dump(records, f, indent=2)
+        json.dump(library, f, indent=2)
 
 
 def exit_program():
