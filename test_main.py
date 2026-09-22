@@ -273,3 +273,19 @@ def test_print_author_stats_returns_to_menu(monkeypatch):
     main.print_author_stats()
 
     assert called == [True]
+
+
+def test_add_book_stores_blank_year_as_none(monkeypatch):
+    answers = iter(["A", "X", "", ""])
+
+    monkeypatch.setattr("builtins.input", lambda _: next(answers))
+    monkeypatch.setattr(main, "display_menu", lambda: None)
+
+    main.add_book()
+
+    assert main.library == {"a": {"title": "A", "author": "X", "year": None}}
+
+
+def test_format_book_shows_unknown_for_none_year():
+    book = {"title": "A", "author": "X", "year": None}
+    assert main.format_book(book) == "A by X (Unknown)"
