@@ -1,64 +1,56 @@
-"""
-Layer 1: Personal Library Manager - List of Titles
-=====================================================
-Purpose
--------
-This is the FIRST layer of the Personal Library Manager project.
-The goal here is not efficiency or good design -- it is to practice
-basic Python control flow (loops, conditionals) and basic list
-operations before introducing more advanced data structures.
-
-Data Model
-----------
-The entire library is represented as a single list of strings:
-
-    library = ["Dune", "1984", "The Hobbit"]
-
-Limitations (intentional, to motivate Layer 2)
------------------------------------------------
-- Only the title is stored; there is no place for author or year.
-- Checking for a duplicate title requires an O(n) linear scan.
-- There is no structure for "author" statistics at all.
-
-These limitations are exactly why the project moves on to Layer 2.
-"""
-
-
+import json
 import os
-
 
 library = []
 
+# tracks lowercased titles currently in the library, so duplicates can be
+# detected in O(1) instead of scanning the whole list each time
+book_titles = set()
 
 # save file next to the script
-LIBRARY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "library.txt")
+LIBRARY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "library.json")
 
 
 def load_library():
     """
-    Load book titles from LIBRARY_FILE into the library list.
+    Load book records from LIBRARY_FILE into the library list.
+
+    LIBRARY_FILE is expected to be a JSON array of objects, each with
+    "title", "author", and "year" keys. Also rebuilds book_titles from
+    the loaded data so duplicate checks work correctly after loading.
 
     Params: none.
     Returns: None.
     """
     if os.path.exists(LIBRARY_FILE):
         with open(LIBRARY_FILE, "r", encoding="utf-8") as f:
-            for line in f:
-                title = line.rstrip("\n")
-                if title != "":
-                    library.append(title)
+            try:
+                records = json.load(f)
+            except json.JSONDecodeError:
+                records = []
+
+        for record in records:
+            title = record.get("title", "")
+            author = record.get("author", "Unknown")
+            year = record.get("year", "Unknown")
+            library.append((title, author, year))
+            book_titles.add(title.lower())
 
 
 def save_library():
     """
-    Write the current library list to LIBRARY_FILE, one title per line.
+    Write the current library list to LIBRARY_FILE as a JSON array of
+    {"title", "author", "year"} objects.
 
     Params: none.
     Returns: None.
     """
+    records = [
+        {"title": title, "author": author, "year": year}
+        for title, author, year in library
+    ]
     with open(LIBRARY_FILE, "w", encoding="utf-8") as f:
-        for book in library:
-            f.write(book + "\n")
+        json.dump(records, f, indent=2)
 
 
 def exit_program():
@@ -74,15 +66,16 @@ def exit_program():
 
 def matches_search(book, query):
     """
-    Check whether a search query appears in a book title, case-insensitively.
+    Check whether a search query appears in a book's title, case-insensitively.
 
     Params:
-        book (str): The book title to check.
+        book (tuple): A (title, author, year) book entry.
         query (str): The search term to look for.
     Returns:
-        bool: True if query is found in book, False otherwise.
+        bool: True if query is found in the book's title, False otherwise.
     """
-    return query.lower() in book.lower()
+    title, author, year = book
+    return query.lower() in title.lower()
 
 
 def format_book(book):
@@ -90,12 +83,27 @@ def format_book(book):
     Format a book entry for display.
 
     Params:
-        book: The book entry to format (currently a plain string).
+        book (tuple): A (title, author, year) book entry.
     Returns:
-        The formatted book entry. Placeholder until book dicts are implemented.
+        str: A human-readable "Title by Author (Year)" string.
     """
-    # Will format book dicts when implemented 
-    return book
+    title, author, year = book
+    return f"{title} by {author} ({year})"
+
+
+def find_book_by_title(title):
+    """
+    Find the first book in the library whose title matches, case-insensitively.
+
+    Params:
+        title (str): The title to look for.
+    Returns:
+        tuple | None: The matching (title, author, year) entry, or None if not found.
+    """
+    for book in library:
+        if book[0].lower() == title.lower():
+            return book
+    return None
 
 
 def search_book():
@@ -108,25 +116,27 @@ def search_book():
     print("")
     while True:
         query = input("Enter search term (Blank line to exit): ")
- 
+
         if query == "":
             break
- 
+
         results = [book for book in library if matches_search(book, query)]
- 
+
         if results:
             print(f"\nFound {len(results)} matching book(s):")
             for id, book in enumerate(results, start=1):
                 print(f"{id}. {format_book(book)}")
         else:
             print(f"\nNo results found for '{query}'.")
- 
+
     display_menu()
 
 
 def add_book():
     """
-    Repeatedly prompt for book titles and add each to the library until blank input.
+    Repeatedly prompt for a book's title, author, and year and add each as
+    a (title, author, year) tuple to the library until a blank title is
+    entered. Titles already in the library (case-insensitive) are rejected.
 
     Params: none.
     Returns: None. Saves the library and returns control to the menu when done.
@@ -134,20 +144,29 @@ def add_book():
     print("")
     while True:
         book_title = input("Enter book title to add (Blank line to exit): ").strip()
-        
-        if (book_title == ""):
+
+        if book_title == "":
             break
-        
-        library.append(book_title)
-        print(f"Added {book_title} to library.")
-        
+
+        if book_title.lower() in book_titles:
+            print(f"{book_title} already exists in library.")
+            continue
+
+        author = input("Enter author: ").strip()
+        year = input("Enter year published: ").strip()
+
+        library.append((book_title, author, year))
+        book_titles.add(book_title.lower())
+        print(f"Added {book_title} to library.\n")
+
     save_library()
     display_menu()
 
 
 def remove_book():
     """
-    Repeatedly prompt for book titles and remove each from the library until blank input.
+    Repeatedly prompt for book titles and remove each matching book from
+    the library until blank input.
 
     Params: none.
     Returns: None. Saves the library and returns control to the menu when done.
@@ -155,15 +174,18 @@ def remove_book():
     print("")
     while True:
         book_title = input("Enter book title to remove (Blank line to exit): ").strip()
-        
-        if (book_title == ""):
+
+        if book_title == "":
             break
-        elif (book_title in library):
-            library.remove(book_title)
-            print(f"Removed {book_title} from library.")
+
+        book = find_book_by_title(book_title)
+        if book is not None:
+            library.remove(book)
+            book_titles.discard(book[0].lower())
+            print(f"Removed {book[0]} from library.\n")
         else:
             print(f"{book_title} doesn't exist in library.")
-        
+
     save_library()
     display_menu()
 
@@ -178,7 +200,7 @@ def list_books():
     if (len(library) > 0):
         print("\nLibrary:")
         for id, book in enumerate(library, start=1):
-            print(f"{id}. {book}")
+            print(f"{id}. {format_book(book)}")
         display_menu()
     else:
         print("\nNo books in library.")
