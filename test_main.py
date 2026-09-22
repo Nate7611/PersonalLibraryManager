@@ -141,24 +141,38 @@ def test_add_book_strips_whitespace(monkeypatch):
     assert main.library == [("Dune", "Frank Herbert", "1965")]
 
 
-def test_add_book_rejects_duplicate_titles_case_insensitively(monkeypatch, capsys):
+def test_add_book_updates_existing_title_case_insensitively(monkeypatch, capsys):
     main.library.append(("Dune", "Frank Herbert", "1965"))
     main.book_titles.add("dune")
-    answers = iter(["dune", ""])
+    answers = iter(["dune", "Frank Herbert Jr.", "1965 (Revised)", ""])
 
     monkeypatch.setattr("builtins.input", lambda _: next(answers))
     monkeypatch.setattr(main, "display_menu", lambda: None)
 
     main.add_book()
 
-    assert main.library == [("Dune", "Frank Herbert", "1965")]
-    assert "already exists in library" in capsys.readouterr().out
+    assert main.library == [("dune", "Frank Herbert Jr.", "1965 (Revised)")]
+    assert "Updated dune in library" in capsys.readouterr().out
+
+
+def test_add_book_updating_does_not_create_duplicate_entry(monkeypatch):
+    main.library.append(("Dune", "Frank", "1999"))
+    main.book_titles.add("dune")
+    answers = iter(["Dune", "Frank", "1999", ""])
+
+    monkeypatch.setattr("builtins.input", lambda _: next(answers))
+    monkeypatch.setattr(main, "display_menu", lambda: None)
+
+    main.add_book()
+
+    assert len(main.library) == 1
+    assert main.library == [("Dune", "Frank", "1999")]
 
 
 def test_remove_book_removes_existing_title(monkeypatch):
     main.library.extend([
-        ("Dune", "Frank Herbert", "1965"),
-        ("The Hobbit", "J.R.R. Tolkien", "1937"),
+        ("Dune", "Frank", "1999"),
+        ("The Hobbit", "Tolkien", "1999"),
     ])
     main.book_titles.update({"dune", "the hobbit"})
     answers = iter(["Dune", ""])
@@ -168,12 +182,12 @@ def test_remove_book_removes_existing_title(monkeypatch):
 
     main.remove_book()
 
-    assert main.library == [("The Hobbit", "J.R.R. Tolkien", "1937")]
+    assert main.library == [("The Hobbit", "Tolkien", "1999")]
     assert "dune" not in main.book_titles
 
 
 def test_remove_book_matches_case_insensitively(monkeypatch):
-    main.library.append(("The Hobbit", "J.R.R. Tolkien", "1937"))
+    main.library.append(("The Hobbit", "Tolkien", "1999"))
     main.book_titles.add("the hobbit")
     answers = iter(["the hobbit", ""])
 
@@ -187,7 +201,7 @@ def test_remove_book_matches_case_insensitively(monkeypatch):
 
 
 def test_remove_book_keeps_missing_title_and_prints_message(monkeypatch, capsys):
-    main.library.append(("Dune", "Frank Herbert", "1965"))
+    main.library.append(("Dune", "Frank", "1999"))
     answers = iter(["Hobbit", ""])
 
     monkeypatch.setattr("builtins.input", lambda _: next(answers))
@@ -195,22 +209,22 @@ def test_remove_book_keeps_missing_title_and_prints_message(monkeypatch, capsys)
 
     main.remove_book()
 
-    assert main.library == [("Dune", "Frank Herbert", "1965")]
+    assert main.library == [("Dune", "Frank", "1999")]
     assert "doesn't exist in library" in capsys.readouterr().out
 
 
 def test_list_books_prints_numbered_books(monkeypatch, capsys):
     main.library.extend([
-        ("Dune", "Frank Herbert", "1965"),
-        ("The Hobbit", "J.R.R. Tolkien", "1937"),
+        ("Dune", "Frank", "1999"),
+        ("The Hobbit", "Tolkien", "1999"),
     ])
     monkeypatch.setattr(main, "display_menu", lambda: None)
 
     main.list_books()
 
     out = capsys.readouterr().out
-    assert "1. Dune by Frank Herbert (1965)" in out
-    assert "2. The Hobbit by J.R.R. Tolkien (1937)" in out
+    assert "1. Dune by Frank (1999)" in out
+    assert "2. The Hobbit by Tolkien (1999)" in out
 
 
 def test_select_menu_option_runs_chosen_function(monkeypatch):
