@@ -1,11 +1,7 @@
 import json
 import os
 
-library = []
-
-# tracks lowercased titles currently in the library, so duplicates can be
-# detected in O(1) instead of scanning the whole list each time
-book_titles = set()
+library = {}
 
 # save file next to the script
 LIBRARY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "library.json")
@@ -13,12 +9,8 @@ LIBRARY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "library
 
 def load_library():
     """
-    Load book records from LIBRARY_FILE into the library list.
-
-    LIBRARY_FILE is expected to be a JSON array of objects, each with
-    "title", "author", and "year" keys. Also rebuilds book_titles from
-    the loaded data so duplicate checks work correctly after loading.
-    If LIBRARY_FILE exists, prints how many books were loaded from it.
+    Load books from LIBRARY_FILE into the library dict, keyed by lowercased title.
+    Does nothing if the file is missing; treats invalid JSON as no records.
 
     Params: none.
     Returns: None.
@@ -34,24 +26,19 @@ def load_library():
             title = record.get("title", "")
             author = record.get("author", "Unknown")
             year = record.get("year", "Unknown")
-            library.append((title, author, year))
-            book_titles.add(title.lower())
+            library[title.lower()] = {"title": title, "author": author, "year": year}
 
         print(f"Loaded {len(records)} books from {os.path.basename(LIBRARY_FILE)}.")
 
 
 def save_library():
     """
-    Write the current library list to LIBRARY_FILE as a JSON array of
-    {"title", "author", "year"} objects.
+    Write the library dict to LIBRARY_FILE as a JSON array of book records.
 
     Params: none.
     Returns: None.
     """
-    records = [
-        {"title": title, "author": author, "year": year}
-        for title, author, year in library
-    ]
+    records = list(library.values())
     with open(LIBRARY_FILE, "w", encoding="utf-8") as f:
         json.dump(records, f, indent=2)
 
@@ -76,8 +63,8 @@ def print_author_stats():
     """
     if len(library) > 0:
         counts = {}
-        for title, author, year in library:
-            counts[author] = counts.get(author, 0) + 1
+        for book in library.values():
+            counts[book["author"]] = counts.get(book["author"], 0) + 1
 
         print("\nBooks per author:")
         for author, count in counts.items():
@@ -93,13 +80,12 @@ def matches_search(book, query):
     Check whether a search query appears in a book's title, case-insensitively.
 
     Params:
-        book (tuple): A (title, author, year) book entry.
+        book (dict): A {"title", "author", "year"} book record.
         query (str): The search term to look for.
     Returns:
         bool: True if query is found in the book's title, False otherwise.
     """
-    title, author, year = book
-    return query.lower() in title.lower()
+    return query.lower() in book["title"].lower()
 
 
 def format_book(book):
@@ -107,27 +93,11 @@ def format_book(book):
     Format a book entry for display.
 
     Params:
-        book (tuple): A (title, author, year) book entry.
+        book (dict): A {"title", "author", "year"} book record.
     Returns:
         str: A human-readable "Title by Author (Year)" string.
     """
-    title, author, year = book
-    return f"{title} by {author} ({year})"
-
-
-def find_book_by_title(title):
-    """
-    Find the first book in the library whose title matches, case-insensitively.
-
-    Params:
-        title (str): The title to look for.
-    Returns:
-        tuple | None: The matching (title, author, year) entry, or None if not found.
-    """
-    for book in library:
-        if book[0].lower() == title.lower():
-            return book
-    return None
+    return f"{book['title']} by {book['author']} ({book['year']})"
 
 
 def search_book():
@@ -144,7 +114,7 @@ def search_book():
         if query == "":
             break
 
-        results = [book for book in library if matches_search(book, query)]
+        results = [book for book in library.values() if matches_search(book, query)]
 
         if results:
             print(f"\nFound {len(results)} matching book(s):")
@@ -159,10 +129,9 @@ def search_book():
 def add_book():
     """
     Repeatedly prompt for a book's title, author, and year and add each as
-    a (title, author, year) tuple to the library until a blank title is
-    entered. If the title already exists in the library (case-insensitive),
-    its author and year are updated in place instead of adding a duplicate
-    entry.
+    a record to the library until a blank title is entered. If the title
+    already exists in the library (case-insensitive), its author and year
+    are overwritten in place instead of adding a duplicate entry.
 
     Params: none.
     Returns: None. Saves the library and returns control to the menu when done.
@@ -177,14 +146,13 @@ def add_book():
         author = input("Enter author: ").strip()
         year = input("Enter year published: ").strip()
 
-        existing = find_book_by_title(book_title)
-        if existing is not None:
-            library.remove(existing)
-            library.append((book_title, author, year))
+        key = book_title.lower()
+        is_update = key in library
+        library[key] = {"title": book_title, "author": author, "year": year}
+
+        if is_update:
             print(f"Updated {book_title} in library.\n")
         else:
-            library.append((book_title, author, year))
-            book_titles.add(book_title.lower())
             print(f"Added {book_title} to library.\n")
 
     save_library()
@@ -206,11 +174,12 @@ def remove_book():
         if book_title == "":
             break
 
-        book = find_book_by_title(book_title)
+        key = book_title.lower()
+        book = library.get(key)
+
         if book is not None:
-            library.remove(book)
-            book_titles.discard(book[0].lower())
-            print(f"Removed {book[0]} from library.\n")
+            del library[key]
+            print(f"Removed {book['title']} from library.\n")
         else:
             print(f"{book_title} doesn't exist in library.")
 
@@ -225,9 +194,9 @@ def list_books():
     Params: none.
     Returns: None. Returns control to the menu when done.
     """
-    if (len(library) > 0):
+    if len(library) > 0:
         print("\nLibrary:")
-        for id, book in enumerate(library, start=1):
+        for id, book in enumerate(library.values(), start=1):
             print(f"{id}. {format_book(book)}")
         display_menu()
     else:
