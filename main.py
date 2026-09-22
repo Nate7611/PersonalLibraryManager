@@ -56,7 +56,7 @@ def exit_program():
 
 def print_author_stats():
     """
-    Print how many books each author has in the library.
+    Print how many books each author has in the library, sorted by most.
 
     Params: none.
     Returns: None. Returns control to the menu when done.
@@ -67,7 +67,7 @@ def print_author_stats():
             counts[book["author"]] = counts.get(book["author"], 0) + 1
 
         print("\nBooks per author:")
-        for author, count in counts.items():
+        for author, count in sorted(counts.items(), key=lambda item: item[1], reverse=True):
             print(f"{author}: {count}")
     else:
         print("\nNo books in library.")
