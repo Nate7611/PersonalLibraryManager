@@ -18,6 +18,7 @@ def load_library():
     LIBRARY_FILE is expected to be a JSON array of objects, each with
     "title", "author", and "year" keys. Also rebuilds book_titles from
     the loaded data so duplicate checks work correctly after loading.
+    If LIBRARY_FILE exists, prints how many books were loaded from it.
 
     Params: none.
     Returns: None.
@@ -35,6 +36,8 @@ def load_library():
             year = record.get("year", "Unknown")
             library.append((title, author, year))
             book_titles.add(title.lower())
+
+        print(f"Loaded {len(records)} books from {os.path.basename(LIBRARY_FILE)}.")
 
 
 def save_library():
@@ -61,7 +64,7 @@ def exit_program():
     Returns: None.
     """
     save_library()
-    print("\nGoodbye")
+    print(f"\nLibrary saved to {os.path.basename(LIBRARY_FILE)}. Goodbye!")
 
 
 def print_author_stats():
