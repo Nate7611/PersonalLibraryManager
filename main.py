@@ -64,6 +64,27 @@ def exit_program():
     print("\nGoodbye")
 
 
+def print_author_stats():
+    """
+    Print how many books each author has in the library.
+
+    Params: none.
+    Returns: None. Returns control to the menu when done.
+    """
+    if len(library) > 0:
+        counts = {}
+        for title, author, year in library:
+            counts[author] = counts.get(author, 0) + 1
+
+        print("\nBooks per author:")
+        for author, count in counts.items():
+            print(f"{author}: {count}")
+    else:
+        print("\nNo books in library.")
+
+    display_menu()
+
+
 def matches_search(book, query):
     """
     Check whether a search query appears in a book's title, case-insensitively.
@@ -240,6 +261,7 @@ def display_menu():
         {"text": "Remove Book", "function": remove_book},
         {"text": "List Books", "function": list_books},
         {"text": "Search Book", "function": search_book},
+        {"text": "Show Author Statistics", "function": print_author_stats},
         {"text": "Exit", "function": exit_program},
     ]
     for i, option in enumerate(options, start=1):
