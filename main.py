@@ -97,7 +97,8 @@ def format_book(book):
     Returns:
         str: A human-readable "Title by Author (Year)" string.
     """
-    return f"{book['title']} by {book['author']} ({book['year']})"
+    year = book["year"] if book["year"] is not None else "Unknown"
+    return f"{book['title']} by {book['author']} ({year})"
 
 
 def search_book():
